@@ -31,11 +31,18 @@
 
 import { UIState } from './';
 
-type UIActionType = { type: 'UI - Open Sidebar' } | { type: 'UI - Close Sidebar' };
+type UIActionType =
+  | { type: 'UI - Open Sidebar' }
+  | { type: 'UI - Close Sidebar' }
+  | { type: 'UI - Set isAddingEntry'; payload: boolean };
 
 export const UIReducer = (state: UIState, action: UIActionType): UIState => {
   switch (action.type) {
     case 'UI - Open Sidebar':
+      /** ...state rompe la referencia en javascript, luego se le agrega el nuevo valor
+       *  de esta manera, no modificamos directamente el valor del INITIAL_STATE
+       * estamos retornando nu nuevo state, apuntando a un nuevo espacio de memoria
+       * */
       return {
         ...state,
         sidemenuOpen: true,
@@ -45,6 +52,12 @@ export const UIReducer = (state: UIState, action: UIActionType): UIState => {
       return {
         ...state,
         sidemenuOpen: false,
+      };
+
+    case 'UI - Set isAddingEntry':
+      return {
+        ...state,
+        isAddingEntry: action.payload,
       };
 
     default:

@@ -1,13 +1,20 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState, useContext } from 'react';
+
 import { Box } from '@mui/system';
 import { Button, TextField } from '@mui/material';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import AddIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 
+import { EntriesContext } from '../../context/entries';
+import { UIContext } from '../../context/ui';
+
 export const NewEntry = () => {
-  const [isAdding, setIsAdding] = useState(false);
+  // const [isAdding, setIsAdding] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [touched, setTouched] = useState(false);
+
+  const { isAddingEntry, setIsAddingEntry } = useContext(UIContext);
+  const { addNewEntry } = useContext(EntriesContext);
 
   const onTextFieldChanged = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -16,12 +23,15 @@ export const NewEntry = () => {
   const onSave = () => {
     if (inputValue.length === 0) return;
 
-    console.log({ inputValue });
+    addNewEntry(inputValue);
+    setIsAddingEntry(false);
+    setTouched(false);
+    setInputValue('');
   };
 
   return (
     <Box sx={{ marginBottom: 2, paddingX: 2 }}>
-      {isAdding ? (
+      {isAddingEntry ? (
         <>
           <TextField
             fullWidth
@@ -36,7 +46,10 @@ export const NewEntry = () => {
             onChange={onTextFieldChanged}
             onBlur={() => setTouched(true)}
           />
-          <Box display='flex' justifyContent='space-between' onClick={() => setIsAdding(false)}>
+          <Box
+            display='flex'
+            justifyContent='space-between'
+            onClick={() => setIsAddingEntry(false)}>
             <Button variant='text'>Cancel</Button>
             <Button
               variant='outlined'
@@ -52,7 +65,7 @@ export const NewEntry = () => {
           fullWidth
           variant='outlined'
           startIcon={<AddIcon />}
-          onClick={() => setIsAdding(true)}>
+          onClick={() => setIsAddingEntry(true)}>
           Add new task
         </Button>
       )}
