@@ -8,9 +8,11 @@ import { createContext } from 'react';
 interface ContextProps {
   sidemenuOpen: boolean;
   isAddingEntry: boolean;
+  isDragging: boolean;
   openSideMenu: () => void;
   closeSideMenu: () => void;
   setIsAddingEntry: (set: boolean) => void;
+  setIsDragging: (isDragging: boolean) => void;
 }
 
 export const UIContext = createContext({} as ContextProps);
