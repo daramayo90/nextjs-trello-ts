@@ -8,13 +8,13 @@ docker-compose up -d
 
 - -d means **detached**
 
-- MongoDB URL Local:
+MongoDB URL Local:
 
 ```
 mongodb://localhost:27017/entriesdb
 ```
 
-## Configure entorno variables
+## Configure environment variables
 
 Rename file **.env.template** to **.env**
 
