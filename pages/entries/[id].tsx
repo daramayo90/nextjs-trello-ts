@@ -24,6 +24,7 @@ import { dbEntries } from '../../database';
 import { Layout } from '../../components/layout';
 import { Entry, EntryStatus } from '../../interfaces';
 import { EntriesContext } from '../../context/entries';
+import { dateFunctions } from '../../utils';
 
 const validStatus: EntryStatus[] = ['pending', 'in-progress', 'finished'];
 
@@ -65,7 +66,10 @@ export const EntryPage: FC<Props> = ({ entry }) => {
       <Grid container justifyContent='center' sx={{ marginTop: 2 }}>
         <Grid item xs={12} sm={8} md={6}>
           <Card>
-            <CardHeader title={`Entry: `} subheader={`Created ago: ${entry.createdAt} minutes`} />
+            <CardHeader
+              title={`Entry: `}
+              subheader={`Created: ${dateFunctions.getFormatDistanceToNow(entry.createdAt)}`}
+            />
 
             <CardContent>
               <TextField
