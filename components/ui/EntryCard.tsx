@@ -1,5 +1,8 @@
 import { DragEvent, FC, useContext } from 'react';
+import { useRouter } from 'next/router';
+
 import { Card, CardActionArea, CardActions, CardContent, Typography } from '@mui/material';
+
 import { Entry } from '../../interfaces';
 import { UIContext } from '../../context/ui';
 
@@ -9,6 +12,7 @@ interface Props {
 
 export const EntryCard: FC<Props> = ({ entry }) => {
   const { setIsDragging } = useContext(UIContext);
+  const router = useRouter();
   /**
    * Update the state to indicate where the draggable action can be done
    * Works in the same way as localStorage (setData - getData) - (key, value)
@@ -23,8 +27,17 @@ export const EntryCard: FC<Props> = ({ entry }) => {
     setIsDragging(false);
   };
 
+  const onClick = () => {
+    router.push(`/entries/${entry._id}`);
+  };
+
   return (
-    <Card sx={{ marginBottom: 1 }} draggable={true} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+    <Card
+      sx={{ marginBottom: 1 }}
+      draggable={true}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onClick={onClick}>
       <CardActionArea>
         <CardContent>
           <Typography sx={{ whiteSpace: 'pre-line' }}>{entry.description}</Typography>

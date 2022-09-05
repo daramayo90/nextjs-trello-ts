@@ -1,4 +1,5 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, FC, useMemo, useState, useContext } from 'react';
+import { GetServerSideProps } from 'next';
 
 import {
   capitalize,
@@ -19,15 +20,25 @@ import {
 import SaveAsOutlinedIcon from '@mui/icons-material/SaveAsOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
+import { dbEntries } from '../../database';
 import { Layout } from '../../components/layout';
-import { EntryStatus } from '../../interfaces';
+import { Entry, EntryStatus } from '../../interfaces';
+import { EntriesContext } from '../../context/entries';
 
 const validStatus: EntryStatus[] = ['pending', 'in-progress', 'finished'];
 
-export const Entry = () => {
-  const [inputValue, setInputValue] = useState('');
-  const [status, setStatus] = useState<EntryStatus>('pending');
-  const [touched, settouched] = useState(false);
+interface Props {
+  entry: Entry;
+}
+
+export const EntryPage: FC<Props> = ({ entry }) => {
+  const { updateEntry } = useContext(EntriesContext);
+
+  const [inputValue, setInputValue] = useState(entry.description);
+  const [status, setStatus] = useState<EntryStatus>(entry.status);
+  const [touched, setTouched] = useState(false);
+
+  const isNotValid = useMemo(() => inputValue.length <= 0 && touched, [inputValue, touched]);
 
   const onInputValueChanged = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -38,15 +49,23 @@ export const Entry = () => {
   };
 
   const onSave = () => {
-    console.log({ inputValue, status });
+    if (inputValue.trim().length === 0) return;
+
+    const updatedEntry: Entry = {
+      ...entry,
+      status,
+      description: inputValue,
+    };
+
+    updateEntry(updatedEntry, true);
   };
 
   return (
-    <Layout title='... ... ...'>
+    <Layout title={inputValue.substring(0, 20) + '...'}>
       <Grid container justifyContent='center' sx={{ marginTop: 2 }}>
         <Grid item xs={12} sm={8} md={6}>
           <Card>
-            <CardHeader title={`Entry: ${inputValue}`} subheader={`Created ago: .... minutes`} />
+            <CardHeader title={`Entry: `} subheader={`Created ago: ${entry.createdAt} minutes`} />
 
             <CardContent>
               <TextField
@@ -57,7 +76,10 @@ export const Entry = () => {
                 multiline
                 label='Update Entry'
                 value={inputValue}
+                onBlur={() => setTouched(true)}
                 onChange={onInputValueChanged}
+                helperText={isNotValid && 'Please, add a new value'}
+                error={isNotValid}
               />
 
               <FormControl>
@@ -79,7 +101,8 @@ export const Entry = () => {
                   startIcon={<SaveAsOutlinedIcon />}
                   variant='contained'
                   fullWidth
-                  onClick={onSave}>
+                  onClick={onSave}
+                  disabled={inputValue.length <= 0}>
                   Save
                 </Button>
               </CardActions>
@@ -95,4 +118,30 @@ export const Entry = () => {
   );
 };
 
-export default Entry;
+// You should use getServerSideProps when:
+// - Only if you need to pre-render a page whose data must be fetched at request time
+// export const getServerSideProps: GetServerSideProps = async (ctx) => {
+
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  // console.log(ctx.params); => { id: '123' }
+  const { id } = params as { id: string };
+
+  const entry = await dbEntries.getEntryById(id);
+
+  if (!entry) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      entry,
+    },
+  };
+};
+
+export default EntryPage;
